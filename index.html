@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+
+
+   #distriMap{
+      background-image:-webkit-linear-gradient(top, #d2dfec,#E4E2D4);background-image:linear-gradient(to bottom, #d2dfec,#E4E2D4);margin:2em 0}
+    }
+
+
+
+
+.graticule{fill:none;stroke:#FFF;opacity:0}
+
+.land{fill:#aabad2;fill-opacity:0.4;stroke:#d4dbe3;stroke-width:1}
+
+    .boundary {
+      fill: none;
+      stroke: none;
+      stroke-width: .25px;
+      stroke-opacity: .25;
+      }
+  
+
+</style>
+<body>
+<div id="distriMap"></div>    
+  
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>  
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-geo-projection/0.2.15/d3.geo.projection.min.js"></script>
+<script>
+
+ //Quick fix for resizing some things for mobile-ish viewers
+      var mobileScreen = ($( window ).innerWidth() < 500 ? true : false);
+      var width = document.getElementById('distriMap').offsetWidth;;
+      var height = mobileScreen ? 280 : 531;
+
+
+      var projection = d3.geo.robinson()
+        .scale(mobileScreen ? 100 : 200)
+        .translate([width / 2, 6*height / 10])
+        //.clipAngle(180 - 1e-3)
+        .precision(.01);
+      
+      var svg = d3.select("#distriMap").append("svg")
+          .attr("width", width)
+          .attr("height", height);
+
+      var path = d3.geo.path()
+          .projection(projection);
+      var g = svg.append("g");
+      
+
+      
+
+      d3.json("data/map.json", function(error, topology) {
+        g.insert("path", ".graticule")
+                      .datum(topojson.feature(topology, topology.objects.land))
+                      .attr("class", "land")
+                      .attr("d", path);
+
+                g.insert("path", ".graticule")
+                    .datum(topojson.mesh(topology, topology.objects.countries, function(a, b) { return a !== b; }))
+                    .attr("class", "boundary")
+                    .attr("d", path);
+
+      });
+</script>
